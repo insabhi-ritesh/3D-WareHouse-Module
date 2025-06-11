@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="stock_3d_view.ProductTemplateWidget">
+        <div class="product_template_3d_widget">
+            <h3>3D Properties</h3>
+            <div class="dimensions">
+                <span>Length: <t t-esc="length"/></span>
+                <span>Width: <t t-esc="width"/></span>
+                <span>Height: <t t-esc="height"/></span>
+            </div>
+            <div class="position">
+                <span>Pos X: <t t-esc="pos_x"/></span>
+                <span>Pos Y: <t t-esc="pos_y"/></span>
+                <span>Pos Z: <t t-esc="pos_z"/></span>
+            </div>
+        </div>
+    </t>
+</templates>
