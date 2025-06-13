@@ -281,6 +281,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 									isSmallBox: true,
 									isProductSmallBox: true,
 									productName: product_data.name,
+									productId: product_data.id,
 								};
 								scene.add(smallBox);
 								group.add(smallBox);
@@ -311,7 +312,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 						group.add(productBox);
 
 						// Add a small box inside the standalone product box
-						const smallBoxGeometry = new THREE.BoxGeometry(5, 5, 5);
+						const smallBoxGeometry = new THREE.BoxGeometry(3, 3, 3);
 						smallBoxGeometry.translate(0, 5 / 2, 0);
 						const smallBoxMaterial = new THREE.MeshBasicMaterial({
 							color: 0xff0000,
@@ -323,7 +324,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 						const smallBox = new THREE.Mesh(smallBoxGeometry, smallBoxMaterial);
 						smallBox.position.set(
 							product_data.pos_x || 0,
-							(product_data.pos_y || 0) + productHeight / 2 + (5 / 2) + 0.1,
+							(product_data.pos_y || 0) + productHeight / 2 + (3 / 2) + 0.1,
 							product_data.pos_z || 0
 						);
 						smallBox.visible = true;
@@ -331,6 +332,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 							isSmallBox: true,
 							isProductSmallBox: true,
 							productName: product_data.name,
+							productId: product_data.id,
 						};
 						scene.add(smallBox);
 						group.add(smallBox);
@@ -464,7 +466,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 							// Fallback: If no products or an error occurred, create a single small box
 							if (numProducts === 0) {
 								console.log("No products found for location", key, ", creating a single small box as fallback");
-								const smallBoxGeometry = new THREE.BoxGeometry(5, 5, 5);
+								const smallBoxGeometry = new THREE.BoxGeometry(3, 3, 3);
 								smallBoxGeometry.translate(0, 5 / 2, 0);
 								const smallBoxMaterial = new THREE.MeshBasicMaterial({
 									color: 0xff0000,
@@ -476,7 +478,7 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 								const smallBox = new THREE.Mesh(smallBoxGeometry, smallBoxMaterial);
 								smallBox.position.set(
 									value[0],
-									value[1] + (5 / 2) + 0.1,
+									value[1] + productHeight / 2 + offsetY + (3 / 2) + 0.1,
 									value[2]
 								);
 								smallBox.visible = true;
@@ -541,11 +543,13 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 
 									// Associate this box with the specific product
 									productBox.visible = true;
+									debugger
 									productBox.userData = {
 										isSmallBox: true,
 										isLocationSmallBox: true,
 										locCode: key,
 										productName: product[0], // Store the product name
+										productId: product[2], // Store the product id
 									};
 									scene.add(productBox);
 									group.add(productBox);
@@ -620,69 +624,17 @@ odoo.define('stock_3d_view.action_open_form_3d_view', function(require) {
 							if (res && res.object) {
 								if (res.object.userData.isSmallBox) {
 									// Handle small box click
-									if (res.object.userData.isProductSmallBox) {
-										// Small box in product.template - show product name only
-										const productName = res.object.userData.productName;
-										function onClickClose() {
-											if (dialogs) {
-												console.log("Closing product dialog, dialogs:", dialogs);
-												dialogs.close();
-												dialogs = null;
-												window.removeEventListener('click', onClickClose);
-											} else {
-												console.log("Product dialog already closed or null");
-												window.removeEventListener('click', onClickClose);
-											}
-										}
-										// Remove any existing click listeners to prevent duplicates
-										window.removeEventListener('click', onClickClose);
-										dialogs = new PositionDialog(this, {
-											title: 'Product Name',
-											size: 'small',
-											$content: $('<div>').text(productName),
-											placement: 'bottom',
-											renderFooter: false,
-											pointer: {
-												x: event.clientX,
-												y: event.clientY,
-											},
-											close: onClickClose,
-										}).open();
-
-										if (dialogs) {
-											window.addEventListener('click', onClickClose);
-										}
-									} else if (res.object.userData.isLocationSmallBox) {
-										// Small box in stock.location - show the specific product name
-										const productName = res.object.userData.productName;
-										function onClickClose() {
-											if (dialogs) {
-												console.log("Closing location small box dialog, dialogs:", dialogs);
-												dialogs.close();
-												dialogs = null;
-												window.removeEventListener('click', onClickClose);
-											} else {
-												console.log("Location small box dialog already closed or null");
-												window.removeEventListener('click', onClickClose);
-											}
-										}
-										// Remove any existing click listeners to prevent duplicates
-										window.removeEventListener('click', onClickClose);
-										dialogs = new PositionDialog(this, {
-											title: 'Product Name',
-											size: 'small',
-											$content: $('<div>').text(productName),
-											placement: 'bottom',
-											renderFooter: false,
-											pointer: {
-												x: event.clientX,
-												y: event.clientY,
-											},
-											close: onClickClose,
-										}).open();
-
-										if (dialogs) {
-											window.addEventListener('click', onClickClose);
+									if (res.object.userData.isProductSmallBox || res.object.userData.isLocationSmallBox) {
+										// Open product.template form view as a popup for both product and location small boxes
+										const productId = res.object.userData.productId;
+										if (productId) {
+											self.actionService.doAction({
+												type: 'ir.actions.act_window',
+												res_model: 'product.template',
+												res_id: productId,
+												views: [[false, 'form']],
+												target: 'new', // Open as a dialog on the same page
+											});
 										}
 									}
 								} else {

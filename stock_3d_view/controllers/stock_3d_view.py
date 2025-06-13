@@ -127,7 +127,7 @@ class Stock3DView(http.Controller):
         product_list.clear()
         if products:
             for rec in products:
-                product_list.append((rec.product_id.display_name, rec.quantity))
+                product_list.append((rec.product_id.display_name, rec.quantity, rec.product_id.id))
         load = math.fsum(quantity_obj)
         if capacity > 0:
             space = capacity - load

@@ -37,7 +37,6 @@
     'depends': ['stock', 'web'],
     'data': [
         'views/stock_location_views.xml',
-        'views/product_template_view.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -50,7 +49,6 @@
             'stock_3d_view/static/src/xml/stock_location_3d_templates.xml',
             'stock_3d_view/static/src/xml/stock_location_breadcrumb_templates.xml',
             'stock_3d_view/static/src/xml/stock_location_modal_templates.xml',
-            'stock_3d_view/static/src/xml/product_template.xml',
         ],
     },
     'images': [
